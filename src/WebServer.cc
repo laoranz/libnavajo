@@ -336,7 +336,7 @@ size_t WebServer::recvLine(int client, char *bufLine, size_t nsize)
 * \return true if the socket must to close
 ***********************************************************************/
 
-bool WebServer::accept_request(ClientSockData* client, bool authSSL)
+bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
 {
   char bufLine[BUFSIZE];
   HttpRequestMethod requestMethod;
@@ -671,7 +671,7 @@ bool WebServer::accept_request(ClientSockData* client, bool authSSL)
         mutipartContentParser->SetMaxCollectedDataLength( mutipartMaxCollectedDataLength );
         mutipartContentParser->SetContentType( mutipartContent );
       }
-      catch (MPFD::Exception e) 
+      catch (const MPFD::Exception& e)
       {
         NVJ_LOG->append(NVJ_DEBUG, "WebServer::accept_request -  MPFD::Exception: "+ e.GetError() );
         delete mutipartContentParser;
@@ -730,7 +730,7 @@ bool WebServer::accept_request(ClientSockData* client, bool authSSL)
             {
               mutipartContentParser->AcceptSomeData( buffer, bufLineLen );
             }
-            catch ( MPFD::Exception e )
+            catch ( const MPFD::Exception& e )
             {
               NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
               break;
@@ -1079,6 +1079,8 @@ const char* WebServer::get_mime_type(const char *name)
   if (strcmp(extLowerCase, ".png") == 0) return "image/png";
   if (strcmp(extLowerCase, ".css") == 0) return "text/css";
   if (strcmp(extLowerCase, ".txt") == 0) return "text/plain";
+  if (strcmp(extLowerCase, ".svg") == 0 || strcmp(extLowerCase, ".svgz") == 0) return "image/svg+xml";
+  if (strcmp(extLowerCase, ".cache") == 0) return "text/cache-manifest";
   if (strcmp(extLowerCase, ".au") == 0) return "audio/basic";
   if (strcmp(extLowerCase, ".wav") == 0) return "audio/wav";
   if (strcmp(extLowerCase, ".avi") == 0) return "video/x-msvideo";
@@ -1364,7 +1366,7 @@ void WebServer::exit()
 * password_cb
 ************************************************************************/
 
-int WebServer::password_cb(char *buf, int num, int rwflag, void *userdata)
+int WebServer::password_cb(char *buf, int num, int /*rwflag*/, void */*userdata*/)
 {
   if((size_t)num<strlen(certpass)+1)
     return(0);
