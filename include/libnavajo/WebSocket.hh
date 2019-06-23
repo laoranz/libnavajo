@@ -230,6 +230,7 @@ class WebSocket
         it++;
         client->closeWS();
       }
+      webSocketClientList.clear();
       pthread_mutex_unlock(&webSocketClientList_mutex);
     }
 

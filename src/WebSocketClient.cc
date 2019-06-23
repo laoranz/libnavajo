@@ -240,8 +240,6 @@ void WebSocketClient::receivingThread()
               free(msgContent);
               msgContent=msg;
               msgLength=msgLen;
-
-              msgContent[msgLength]='\0';
             }
             catch (std::exception& e)
             {
@@ -281,8 +279,8 @@ void WebSocketClient::receivingThread()
               break;
           }
 
-          if ((client->compression == ZLIB) && (rsv & 4) && msgLength)
-            free (msgContent);
+          if ( msgContent != NULL )
+              free(msgContent);
 
           fin=false; rsv=0;
           opcode=0;
@@ -303,7 +301,10 @@ void WebSocketClient::receivingThread()
 
 void WebSocketClient::closeWS()
 {
-  closing=true;
+    if ( closing )
+        return;
+    
+    closing = true;
   websocket->removeClient(this, true);
   websocket->onClosing(this);
 
@@ -318,7 +319,10 @@ void WebSocketClient::closeWS()
 
 void WebSocketClient::closeSend()
 {
-  closing=true;
+    if ( closing )
+        return;
+    
+    closing = true;
   websocket->removeClient(this, false);
   websocket->onClosing(this);
 
@@ -330,7 +334,10 @@ void WebSocketClient::closeSend()
 
 void WebSocketClient::closeRecv()
 {
-  closing=true;
+    if ( closing )
+        return;
+    
+    closing = true;
   websocket->removeClient(this, false);
   websocket->onClosing(this);
 
@@ -374,7 +381,7 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
     return false;
 
   headerBuffer[0]= 0x80 | (msgContent->opcode & 0xf) ; // FIN & OPCODE:0x1
-  if (client->compression == ZLIB)
+    if (client->compression == ZLIB && msgContent->length) 
   {
     headerBuffer[0] |= 0x40; // Set RSV1
     try
@@ -416,8 +423,8 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
      || !WebServer::httpSend(client, msg, msgLen) )
     result = false;
 
-  if (client->compression == ZLIB)
-    free (msg);
+    if (client->compression == ZLIB && msgContent->length)
+        free(msg);
 
   return result;
 }
@@ -429,6 +436,8 @@ void WebSocketClient::addSendingQueue(MessageContent *msgContent)
   pthread_mutex_lock(&sendingQueueMutex);
   if (!closing)
     sendingQueue.push(msgContent);
+    else 
+        free (msgContent);
   pthread_mutex_unlock(&sendingQueueMutex);
   pthread_cond_broadcast ( &sendingNotification );
 }
