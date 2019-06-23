@@ -344,6 +344,7 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
   bool urlencodedForm=false;
 
   std::vector<uint8_t> payload;
+  std::vector<std::string> headers;
   char mimeType[64]="\0";
 
   char *urlBuffer=NULL;
@@ -439,6 +440,9 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
         else *(bufLine+bufLineLen-2)='\0';
         j = 0; while (isspace((int)(bufLine[j])) && j < (unsigned)bufLineLen) j++;
 
+        if ( requestMethod != UNKNOWN_METHOD ) {
+            headers.push_back( bufLine + j );
+        }
 
         // decode login/passwd
         if ( strncmp(bufLine+j, authStr, sizeof authStr - 1 ) == 0)
@@ -830,7 +834,7 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
     int sizeZip=0;
     bool zippedFile=false;
 
-    HttpRequest request(requestMethod, urlBuffer, requestParams, requestCookies, requestOrigin, username, client, mimeType, &payload, mutipartContentParser);
+    HttpRequest request(requestMethod, urlBuffer, requestParams, requestCookies, requestOrigin, username, client, mimeType, &payload, mutipartContentParser, &headers);
 
     const char *mime=get_mime_type(urlBuffer); 
     std::string mimeStr; if (mime != NULL) mimeStr=mime;

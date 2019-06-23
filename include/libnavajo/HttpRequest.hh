@@ -17,6 +17,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <sstream>
 #include <openssl/ssl.h>
 
@@ -54,6 +55,7 @@ class HttpRequest
 {
   typedef std::map <std::string, std::string> HttpRequestParametersMap;
   typedef std::map <std::string, std::string> HttpRequestCookiesMap;  
+  typedef std::map <std::string, std::string> HttpRequestHeadersMap;
 
   const char *url;
   const char *origin;
@@ -62,6 +64,7 @@ class HttpRequest
   HttpRequestMethod httpMethod;
   HttpRequestCookiesMap cookies;
   HttpRequestParametersMap parameters;
+  HttpRequestHeadersMap headers;
   std::string sessionId;
   MPFD::Parser *mutipartContentParser;
   const char *mimeType;
@@ -159,6 +162,27 @@ class HttpRequest
     }
   };
 
+    /*
+    * Decode and store headers vector
+    * @param h: vector of headers
+    */
+	inline void decodHeaders(const std::vector<std::string> *h) {
+	
+	    for (std::vector<std::string>::const_iterator it = h->begin();
+	            it != h->end();
+	            it++) {
+	
+	        std::string::size_type pos = (*it).find(": ");
+	
+	        if (pos != std::string::npos) {
+	            std::string header = (*it).substr(0, pos);
+	            std::transform(header.begin(), header.end(), header.begin(), ::tolower);
+	
+	            this->headers[header] = (*it).substr(pos + 2, (*it).size() - pos - 2);
+	        }
+	    }
+	};
+
   /**********************************************************************/
   /**
   * check the SID cookie and set the sessionID attribute if the session is valid
@@ -222,6 +246,51 @@ class HttpRequest
       for(HttpRequestCookiesMap::const_iterator iter=cookies.begin(); iter!=cookies.end(); ++iter)
        res.push_back(iter->first);
       return res;
+    }
+
+    /**********************************************************************/
+    /**
+    * get headers list
+    * @return a vector containing all headers names
+    */ 
+    inline std::vector<std::string> getHeadersNames() const {
+        std::vector<std::string> res;
+        for (HttpRequestHeadersMap::const_iterator iter = headers.begin(); iter != headers.end(); ++iter)
+            res.push_back(iter->first);
+        return res;
+    }
+
+    /**********************************************************************/
+    /**
+    * get header value
+    * @param name: header name
+    * @param value: header value
+    * @return true if header found
+    */ 
+    inline bool getHeader(const std::string& name, std::string &value) const {
+        if (!headers.empty()) {
+            std::string header = name;
+            std::transform(header.begin(), header.end(), header.begin(), ::tolower);
+
+            HttpRequestHeadersMap::const_iterator it;
+            if ((it = headers.find(header)) != headers.end()) {
+                value = it->second;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**********************************************************************/
+    /**
+    * get header value
+    * @param name: header name
+    * @return header value
+    */ 
+    inline std::string getHeader(const std::string& name) const {
+        std::string res = "";
+        getHeader(name, res);
+        return res;
     }
 
     /**********************************************************************/
@@ -394,7 +463,7 @@ class HttpRequest
     * @cookies params: raw http cookies string
     */         
     HttpRequest(const HttpRequestMethod type, const char *url, const char *params, const char *cookies, const char *origin, const std::string &username, ClientSockData *client,
-                const char* mimeType, std::vector<uint8_t>* payload=NULL, MPFD::Parser *parser=NULL)
+                const char* mimeType, std::vector<uint8_t>* payload=NULL, MPFD::Parser *parser=NULL, std::vector<std::string>* headers = NULL)
     {
       this->httpMethod = type;
       this->url = url;
@@ -409,6 +478,10 @@ class HttpRequest
       
       if (cookies != NULL && strlen(cookies))
         decodCookies(cookies);        
+
+      if (headers != NULL && !headers->empty())
+          decodHeaders(headers);
+
       getSession();
     };
 
