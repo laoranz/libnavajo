@@ -75,7 +75,7 @@ class WebSocketClient
 
     void startWebSocketThreads()
     {
-      create_thread( &receivingThreadId, WebSocketClient::startReceivingThread, static_cast<void *>(this) );
+      create_thread( &receivingThreadId, WebSocketClient::startReceivingThread, static_cast<void *>(this), false );
       create_thread( &sendingThreadId,   WebSocketClient::startSendingThread,   static_cast<void *>(this) );
     }
 
