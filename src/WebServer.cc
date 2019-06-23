@@ -1598,7 +1598,7 @@ void WebServer::initPoolThreads()
   pthread_t newthread;
   for (unsigned i=0; i<threadsPoolSize; i++)
   {
-    create_thread( &newthread, WebServer::startPoolThread, static_cast<void *>(this) );
+        create_thread( &newthread, WebServer::startPoolThread, static_cast<void *> (this), false );
     usleep(500);
   }
   exitedThread=0;
