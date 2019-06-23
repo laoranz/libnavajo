@@ -314,7 +314,7 @@ end:
 size_t WebServer::recvLine(int client, char *bufLine, size_t nsize)
 {
   size_t bufLineLen=0;
-  char c;
+  char c='\0';
   int n;
   do
   {
@@ -353,6 +353,7 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
   char *requestParams=NULL;
   char *requestCookies=NULL;
   char *requestOrigin=NULL;
+  bool expect100Continue=false;
   char *webSocketClientKey=NULL;
   bool websocket=false;
   int webSocketVersion=-1;
@@ -384,6 +385,7 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
     keepAlive=false;
     closing=false;
     isQueryStr=false;
+    expect100Continue=false;
     
     if (urlBuffer != NULL) { free (urlBuffer); urlBuffer=NULL; };
     if (requestParams != NULL) { free (requestParams);  requestParams=NULL; };
@@ -518,6 +520,13 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
           continue;
         }
         
+        if (strncasecmp(bufLine+j, "Expect: 100-continue", 20) == 0) 
+        {
+            j+=20;
+            expect100Continue=true;
+            continue;
+        }
+                
         if (strncasecmp(bufLine+j, "Sec-WebSocket-Key: ", 19) == 0) 
         { 
           j+=19; 
@@ -530,7 +539,7 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
           { j+=26; if (strstr(bufLine+j, "permessage-deflate")  != NULL) client->compression=ZLIB; continue; }
         
         if (strncasecmp(bufLine+j, "Sec-WebSocket-Version: ", 23) == 0)
-          { j+=23; webSocketVersion = atoi(bufLine+j); continue; }
+          { j+=23; webSocketVersion = atoi(bufLine+j); if ( webSocketVersion ) {} continue; }
 
         isQueryStr=false;
         if (strncmp(bufLine+j, "GET", 3) == 0)
@@ -619,6 +628,10 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
       goto FREE_RETURN_TRUE;
     }
 
+    if ( expect100Continue ) {
+        httpSend(client, "HTTP/1.1 100 Continue\r\n\r\n", 25);
+    }
+    
     // update URL to load the default index.html page
     if ( (*urlBuffer == '\0' || *(urlBuffer + strlen(urlBuffer) - 1) == '/' ) )
     {
