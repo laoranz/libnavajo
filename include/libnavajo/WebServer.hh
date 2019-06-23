@@ -305,6 +305,7 @@ class WebServer
     {
       NVJ_LOG->append(NVJ_INFO, "WebServer: Service is stopping !");
       exit();
+      wait();
       threadWebServer=0;
     };
     
