@@ -261,6 +261,11 @@ class WebServer
     */  
     void addWebSocket(const std::string endPoint, WebSocket* websocket) { webSocketEndPoints[endPoint]=websocket; };
     
+    /**Remove a websocket
+    * @param endpoint : websocket endpoint
+    */  
+    void removeWebSocket( const std::string endPoint );
+    
     /**
     * IpV4 hosts only
     */  

@@ -1912,5 +1912,20 @@ std::string WebServer::getHttpWebSocketHeader(const char *messageType, const cha
   return header;
 }
 
+/**Remove a websocket
+* @param endpoint : websocket endpoint
+*/  
+void WebServer::removeWebSocket(const std::string endPoint) 
+{
+    std::map<std::string, WebSocket *>::iterator it = webSocketEndPoints.find(endPoint);
+    if (it != webSocketEndPoints.end()) 
+    {
+        WebSocket *webSocket = (*it).second;
+        webSocket->removeAllClients();
+        webSocketEndPoints.erase(it);
+    }
+}
+
+
 /***********************************************************************/
 
