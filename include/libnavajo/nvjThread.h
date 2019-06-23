@@ -142,8 +142,11 @@ inline void *thread_timeout_scheduler(void *arg)
 	cancelArg *ca=(cancelArg*)arg;
 	pthread_t thread_to_kill=*(ca->p);
 
-	timespec t1={ca->s, ca->ns};
+	timespec t1;
 	timespec t2;
+        
+    t1.tv_sec = ca->s;
+    t1.tv_nsec = ca->ns;
 
 	if (nanosleep(&t1,&t2)==-1)
 	      pthread_exit(0);
