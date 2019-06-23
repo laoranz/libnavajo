@@ -679,8 +679,13 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
       {
         // Initialize MPFDParser
         mutipartContentParser = new MPFD::Parser();
-        mutipartContentParser->SetUploadedFilesStorage(MPFD::Parser::StoreUploadedFilesInFilesystem);
-        mutipartContentParser->SetTempDirForFileUpload( mutipartTempDirForFileUpload );
+        if ( !mutipartTempDirForFileUpload.empty() ) {
+	        mutipartContentParser->SetUploadedFilesStorage(MPFD::Parser::StoreUploadedFilesInFilesystem);
+	        mutipartContentParser->SetTempDirForFileUpload( mutipartTempDirForFileUpload );
+        }
+        else {
+            mutipartContentParser->SetUploadedFilesStorage( MPFD::Parser::StoreUploadedFilesInMemory );
+        }
         mutipartContentParser->SetMaxCollectedDataLength( mutipartMaxCollectedDataLength );
         mutipartContentParser->SetContentType( mutipartContent );
       }
