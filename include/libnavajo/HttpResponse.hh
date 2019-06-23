@@ -254,6 +254,14 @@ class HttpResponse
       httpReturnCodeMessage = message;
     }
 
+    int getHttpReturnCode() 
+    {
+        if (httpReturnCode == unsetHttpReturnCodeMessage)
+            return 204;
+
+        return httpReturnCode;
+    }
+
     /************************************************************************/
     /**
     * generate the http return code string
