@@ -834,6 +834,11 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
     int sizeZip=0;
     bool zippedFile=false;
 
+    int flag=1;
+    
+    // Disable Naggle Algorithm
+    setsockopt( client->socketId ,IPPROTO_TCP,TCP_NODELAY,(char *)&flag,sizeof(flag));
+        
     HttpRequest request(requestMethod, urlBuffer, requestParams, requestCookies, requestOrigin, username, client, mimeType, &payload, mutipartContentParser, &headers);
 
     const char *mime=get_mime_type(urlBuffer); 
