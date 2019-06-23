@@ -58,6 +58,7 @@ class HttpRequest
   typedef std::map <std::string, std::string> HttpRequestHeadersMap;
 
   const char *url;
+  std::string urlFileName;
   const char *origin;
   ClientSockData *clientSockData;
   std::string httpAuthUsername;
@@ -182,6 +183,41 @@ class HttpRequest
 	        }
 	    }
 	};
+
+    /*
+    * Decode and store file name
+    * @param url: url string like: /path/to/filename?p1=s...
+    */
+    inline void decodFileName(const char *url) {
+
+        const char *pUrl = url;
+        const char *pSlash = NULL;
+        const char *pQuery = NULL;
+
+        while ((*pUrl) != '\0') {
+
+            if ((*pUrl) == '/') {
+                pSlash = pUrl;
+            }
+
+            if ((*pUrl) == '?') {
+                pQuery = pUrl;
+                break;
+            }
+
+            pUrl++;
+        }
+
+        if (pSlash) {
+            if (pQuery != NULL) {
+                this->urlFileName.assign(pSlash + 1, pQuery - pSlash - 1);
+            } else {
+                this->urlFileName.assign(pSlash + 1);
+            }
+        } else {
+            this->urlFileName.assign(url);
+        }
+    }
 
   /**********************************************************************/
   /**
@@ -474,6 +510,10 @@ class HttpRequest
       this->payload=payload ;
       this->mutipartContentParser=parser;
 
+	  if ( url != NULL ) {
+	      decodFileName(url);
+	  }
+
       setParams( params );
       
       if (cookies != NULL && strlen(cookies))
@@ -519,6 +559,13 @@ class HttpRequest
     * @return the requested url
     */
     inline const char *getUrl() const { return url; };
+
+    /**********************************************************************/
+    /**
+    * get Filename    
+    * @return the requested filename
+    */
+    inline const std::string getFileName() const { return urlFileName; };
 
     /**********************************************************************/
     /**
