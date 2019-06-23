@@ -107,6 +107,8 @@ void WebSocketClient::receivingThread()
   MsgDecodSteps step=FIRSTBYTE;
   memset( msgKeys, 0, 4*sizeof(unsigned char) );
 
+  websocket->onConnected( this );
+    
   for (;!closing;)
   {
     int n=0;

@@ -56,6 +56,12 @@ class WebSocket
     virtual bool onOpening(HttpRequest* /*request*/) { return true; };
 
     /**
+    * Callback on new websocket client connection
+    * @param request: the http request object
+    */
+    virtual void onConnected(WebSocketClient* /*client*/) { };
+    
+    /**
     * Callback before closing websocket client connection
     * @param request: the http request object
     */
