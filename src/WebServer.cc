@@ -724,7 +724,23 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
           }
         }
         else
-          bufLineLen=recvLine(client->socketId, buffer, requestedLength);
+            bufLineLen = recv(client->socketId, buffer, requestedLength + 1, 0);
+
+        if ( bufLineLen <= 0 ) {
+            break;
+        }
+        
+        if (!payload.size()) {
+            try {
+                payload.reserve(requestContentLength);
+            } catch (std::bad_alloc &e) {
+                NVJ_LOG->append(NVJ_DEBUG, "WebServer::accept_request -  payload.reserve() failed with exception: " + std::string(e.what()));
+                break;
+            }
+        }
+
+        payload.resize(datalen + bufLineLen);
+        memcpy(&payload[datalen], buffer, bufLineLen);
 
         if ( urlencodedForm )
         {
@@ -753,24 +769,6 @@ bool WebServer::accept_request(ClientSockData* client, bool /*authSSL*/)
               NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
               break;
             }
-          else
-          {
-            if (!payload.size())
-            {
-              try
-              {
-                payload.reserve(requestContentLength);
-              }
-              catch (std::bad_alloc &e)
-              {
-                NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  payload.reserve() failed with exception: " + std::string(e.what()) );
-                break;
-              }
-            }
-
-            payload.resize( datalen+bufLineLen );
-            memcpy(&payload[datalen], buffer, bufLineLen);
-          }
         }
 
         datalen+=bufLineLen;
