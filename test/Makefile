@@ -41,7 +41,7 @@ CPPFLAGS	= -I. \
 #            -I../../MPFDParser-1.1.1
 
 LD = g++
-LDFLAGS        =  -Wall -Wno-unused -O3
+LDFLAGS        = -g -Wall -Wno-unused -O3
 EXAMPLE_NAME   = example
 
 EXAMPLE_OBJS = \

@@ -21,7 +21,7 @@
 int main()
 {
   try {
-    auto POSTParser = new MPFD::Parser();
+    MPFD::Parser *POSTParser = new MPFD::Parser();
     POSTParser->SetTempDirForFileUpload( "/tmp" );
     POSTParser->SetMaxCollectedDataLength( 20 * 1024 );
 
@@ -58,6 +58,8 @@ int main()
         std::cout << "Got file field: [" << it->first << "] Filename:[" << fields[it->first]->GetFileName() << "] \n";
       }
     }
+    
+    delete POSTParser;
   }
   catch( MPFD::Exception e ) {
     std::cout << "Exception " << e.GetError() << std::endl;

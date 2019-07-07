@@ -155,6 +155,8 @@ int main()
 
   webServer->wait();
   
+  delete webServer;
+  
   LogRecorder::freeInstance();
   
   delete myUploadRepo;

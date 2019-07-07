@@ -177,6 +177,9 @@ int main()
   // Your Processing here !
   //...
   webServer->wait();
+  
+  delete webServer;
+  
   LogRecorder::freeInstance();
   return 0;
 }

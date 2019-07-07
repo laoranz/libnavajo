@@ -109,6 +109,8 @@ int main()
   //...
   webServer->wait();
   
+  delete webServer;
+  
   LogRecorder::freeInstance();
   return 0;
 }
