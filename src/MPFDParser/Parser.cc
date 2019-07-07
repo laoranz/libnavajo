@@ -42,8 +42,8 @@ MPFD::Parser::~Parser()
   }
 
   // GLSR
-  if( DataCollector ) {
-    delete DataCollector;
+  if( DataCollector != NULL ) {
+    free ( DataCollector );
   }
 }
 
@@ -70,7 +70,7 @@ void MPFD::Parser::AcceptSomeData( const char *data, const long length )
   if( Boundary.length() > 0 ) {
     // Append data to existing accumulator
     if( DataCollector == NULL ) {
-      DataCollector = new char[length];
+      DataCollector = (char *)malloc(length);   // because realloc used
       memcpy( DataCollector, data, length );
       DataCollectorLength = length;
     }
@@ -263,12 +263,12 @@ void MPFD::Parser::TruncateDataCollectorFromTheBeginning( long n )
 
   char *tmp = DataCollector;
 
-  DataCollector = new char[TruncatedDataCollectorLength];
+  DataCollector = (char *)malloc(TruncatedDataCollectorLength);
   memcpy( DataCollector, tmp + n, TruncatedDataCollectorLength );
 
   DataCollectorLength = TruncatedDataCollectorLength;
-
-  delete tmp;
+  
+  free ( tmp );
 }
 
 long MPFD::Parser::BoundaryPositionInDataCollector()

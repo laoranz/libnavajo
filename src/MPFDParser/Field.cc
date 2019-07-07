@@ -20,7 +20,7 @@ MPFD::Field::~Field()
 {
 
   if( FieldContent ) {
-    delete FieldContent;
+    delete [] FieldContent;
   }
 
   if( type == FileType ) {
