@@ -265,6 +265,8 @@ void WebSocketClient::receivingThread()
               {
                 sendCloseCtrlFrame( msgContent, msgLength );
                 closeRecv();
+                if ( msgContent != NULL )
+                    free(msgContent);
                 return;
               }
               break;
@@ -313,7 +315,6 @@ void WebSocketClient::closeWS()
   pthread_cond_broadcast ( &sendingNotification );
   wait_for_thread(sendingThreadId);
   WebServer::freeClientSockData( request->getClientSockData() );
-  wait_for_thread(receivingThreadId);
   restoreSessionExpiration(request);
   delete request;
   delete this;

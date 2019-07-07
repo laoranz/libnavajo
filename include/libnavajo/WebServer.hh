@@ -38,6 +38,7 @@ class WebSocket;
 class WebServer
 {
     pthread_t threadWebServer;
+    bool threadWebServerWaitting;
     SSL_CTX *sslCtx;
     int s_server_session_id_context;
     static char *certpass;
@@ -301,6 +302,7 @@ class WebServer
     {
       NVJ_LOG->append(NVJ_INFO, "WebServer: Service is starting !");
       create_thread( &threadWebServer, WebServer::startThread, this );
+      threadWebServerWaitting = false;
     };
     
     /**
@@ -319,7 +321,10 @@ class WebServer
     */ 
     void wait()
     {
-      wait_for_thread(threadWebServer);
+        if ( !threadWebServerWaitting ) {
+            threadWebServerWaitting = true;
+            wait_for_thread(threadWebServer);
+        }
     };
 
     /**

@@ -1379,6 +1379,8 @@ void WebServer::exit()
   for (std::map<std::string, WebSocket *>::iterator it=webSocketEndPoints.begin(); it!=webSocketEndPoints.end(); ++it)
     it->second->removeAllClients();
 
+  HttpSession::removeAllSession();
+  
   while (nbServerSock>0)
   {
     shutdown ( server_sock[ --nbServerSock ], 2 ) ;
@@ -1758,7 +1760,8 @@ void WebServer::threadProcessing()
     pthread_cond_broadcast (& clientsQueue_cond);
     usleep(500);
   }
-
+  usleep(500);
+  
   // Exiting...
   free (pfd);
 
